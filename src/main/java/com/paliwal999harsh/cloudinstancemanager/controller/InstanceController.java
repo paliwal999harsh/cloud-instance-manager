@@ -61,11 +61,11 @@ public class InstanceController{
         @Valid @RequestBody InstanceRequestDTO instanceRequest) {
 
         if(!CloudProvider.isValid(instanceRequest.getCloud())){
-            log.info("cloud type is not provided, taking default 'AWS'.");
+            log.info("cloud type is not provided/valid, taking default 'AWS'.");
             instanceRequest.setCloud(CloudProvider.AWS);
         }
 
-        if(!instanceRequest.getInstanceName().isEmpty()){
+        if(instanceRequest.getInstanceName().isEmpty()){
             return ResponseEntity.badRequest().body("Instance name is not provided.");
         }
 
@@ -80,7 +80,7 @@ public class InstanceController{
                 return ResponseEntity.status(418).build();
         }
         return instance !=null ? 
-            ResponseEntity.created(null).body(instance) :
+            ResponseEntity.created(null).body(mapper.entityToView(instance)) :
             ResponseEntity.badRequest().build();
     }
 
@@ -182,7 +182,7 @@ public class InstanceController{
         @RequestParam(value = "cloudProvider", required = false, defaultValue = "AWS") CloudProvider cloud){
         List<InstanceView> instances = mapper.entityListToViewList(awsService.getAllInstances());  
         return instances != null ?
-            ResponseEntity.ok().body(instances) :
+            ResponseEntity.ok().body(mapper) :  
             ResponseEntity.noContent().build();
     }
 

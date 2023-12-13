@@ -20,6 +20,7 @@ import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsPro
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2AsyncClient;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
@@ -29,6 +30,7 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.waiters.Ec2AsyncWaiter;
 
 @Service
@@ -58,24 +60,40 @@ public class AWSService implements LeaseService,InstanceService{
 
     @Override
     public InstanceEntity createInstance(String instanceName) {
-        String amiId = "ami-0287a05f0ef0e9d9a";
+        String amiId = "ami-02a2af70a66af6dfb";
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .imageId(amiId)
-                .instanceType(InstanceType.T1_MICRO)
+                .instanceType(InstanceType.T2_MICRO)
                 .maxCount(1)
                 .minCount(1)
                 .build();
-
         try {
 			RunInstancesResponse response = ec2.runInstances(runRequest).get();
 			String instanceId = response.instances().get(0).instanceId();
+            Tag tag = Tag.builder()
+                    .key("Name")
+                    .value(instanceName)
+                    .build();
+            CreateTagsRequest tagRequest = CreateTagsRequest.builder()
+            .resources(instanceId)
+            .tags(tag)
+            .build();
+            ec2.createTags(tagRequest);
 			log.info("Successfully started EC2 Instance {} based on AMI {}",
 			        instanceId, amiId);
 
 			InstanceEntity instance = new InstanceEntity(instanceId,instanceName,CloudProvider.AWS,null);
 			InstanceEntity result = instanceRepo.save(instance);
 			return result;
-		} catch (InterruptedException | ExecutionException e) {
+		}
+        catch (Ec2Exception e) {
+            // Log the exception details
+            log.error("AWS EC2 Exception: {}",e.getMessage());
+        
+            // Rethrow the exception or handle it accordingly
+            throw e;
+        } 
+        catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -123,7 +141,7 @@ public class AWSService implements LeaseService,InstanceService{
             } while (nextToken != null);
 
         } catch (Ec2Exception e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
+            log.error(e.awsErrorDetails().errorMessage());
         }
         log.info("Instance Data in DB {}",instanceRepo.count());
         return instanceRepo.findAll();
