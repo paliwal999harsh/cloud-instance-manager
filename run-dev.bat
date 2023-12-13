@@ -1,0 +1,1 @@
+docker-compose down & docker image rm cloud-instance-manager-core-service & gradle build bootJar & docker-compose up --build --detach & docker image prune -f

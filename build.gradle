@@ -1,0 +1,76 @@
+plugins {
+	id 'java'
+	id 'org.openapi.generator' version '5.3.1'
+	id 'org.springframework.boot' version '3.2.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.paliwal999harsh'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+ext {
+    mapstructVersion = "1.5.3.Final"
+}
+
+jar {
+    enabled = false
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+	// implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	// implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	implementation 'software.amazon.awssdk:ec2:2.21.37'
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+ 	implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+    implementation 'org.hibernate.validator:hibernate-validator:7.0.2.Final'
+	
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+	compileOnly 'org.projectlombok:lombok'
+	compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	// testImplementation 'org.springframework.security:spring-security-test'
+
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = file('./src/main/resources/openapi.yaml').absolutePath // Path to your OpenAPI spec
+    outputDir = "$buildDir/generated-sources/openapi"
+    apiPackage = 'com.paliwal999harsh.cloudinstancemanager.api'
+    modelPackage = 'com.paliwal999harsh.cloudinstancemanager.model'
+    configOptions = [
+            sourceFolder: 'src/main/java'
+    ]
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

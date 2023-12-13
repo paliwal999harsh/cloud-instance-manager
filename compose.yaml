@@ -1,0 +1,39 @@
+version: '3'
+services:
+  mongo:
+    image: mongo
+    mem_limit: 512m
+    volumes:
+      - ./mongodb/data/configdb:/data/configdb:rw
+      - ./mongodb/data/db:/data/db:rw
+    ports:
+      - "27017:27017"
+    networks:
+      - app-net
+    command: "mongod"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 30s
+      retries: 15
+      start_period: 30s
+
+  core-service:
+    build: '.'
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AWS_ACCESS_KEY_ID=AKIAUH7QEFTXTVZEVQOK
+      - AWS_SECRET_ACCESS_KEY=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  
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge

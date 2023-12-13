@@ -1,0 +1,43 @@
+package com.paliwal999harsh.cloudinstancemanager.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfiguration{
+    
+    // @Override
+    // public Filter springSecurityFilterChain() throws Exception {
+	// 	this.webSecurity.addSecurityFilterChainBuilder(() -> {
+    //         this.httpSecurity.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated());
+    //         this.httpSecurity.formLogin(Customizer.withDefaults());
+    //         this.httpSecurity.httpBasic(Customizer.withDefaults());
+    //         return this.httpSecurity.build();
+    //     });
+	// 	for (SecurityFilterChain securityFilterChain : this.securityFilterChains) {
+	// 		this.webSecurity.addSecurityFilterChainBuilder(() -> securityFilterChain);
+	// 	}
+	// 	for (WebSecurityCustomizer customizer : this.webSecurityCustomizers) {
+	// 		customizer.customize(this.webSecurity);
+	// 	}
+	// 	return this.webSecurity.build();
+    // }
+    // protected void configure(HttpSecurity http) throws Exception {
+    //     http.authorizeHttpRequests(null)
+    //             .antMatchers("/public/**").permitAll()
+    //             .anyRequest().authenticated()
+    //             .and()
+    //         .formLogin()
+    //             .loginPage("/custom-login") // Specify your custom login page URL
+    //             .defaultSuccessUrl("/dashboard") // Specify the default success URL
+    //             .failureUrl("/custom-login?error=true") // Specify the failure URL
+    //             .permitAll()
+    //             .and()
+    //         .logout()
+    //             .logoutUrl("/custom-logout") // Specify the custom logout URL
+    //             .logoutSuccessUrl("/custom-login?logout=true") // Specify the logout success URL
+    //             .permitAll();
+    // }
+}
