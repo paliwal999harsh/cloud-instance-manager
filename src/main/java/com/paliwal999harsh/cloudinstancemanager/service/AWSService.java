@@ -15,6 +15,7 @@ import com.paliwal999harsh.cloudinstancemanager.model.InstanceEntity;
 import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.repository.InstanceRepo;
 import com.paliwal999harsh.cloudinstancemanager.repository.LeaseRepo;
+import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
@@ -84,6 +85,7 @@ public class AWSService implements LeaseService,InstanceService{
 
 			InstanceEntity instance = new InstanceEntity(instanceId,instanceName,CloudProvider.AWS,null);
 			InstanceEntity result = instanceRepo.save(instance);
+            leaseRepo.save(createLease(result));
 			return result;
 		}
         catch (Ec2Exception e) {
@@ -148,9 +150,18 @@ public class AWSService implements LeaseService,InstanceService{
     }
 
     @Override
-    public LeaseEntity updateLease(LeaseEntity lease) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateLease'");
+    public LeaseEntity updateLease(LeaseView leaseRequest) {
+        LeaseEntity lease = leaseRepo.findLeaseByInstanceName(leaseRequest.instanceName());
+        lease.setAlwaysOn(leaseRequest.alwaysOn());
+        lease.setWeekendOn(leaseRequest.weekendOn());
+        lease.setStartDate(leaseRequest.startDate());
+        lease.setEndDate(leaseRequest.endDate());
+        lease.setStartTime(leaseRequest.startTime());
+        lease.setEndTime(leaseRequest.endTime());
+        lease = leaseRepo.save(lease);
+        //TODO setup firetime for start and stop the instance
+        return lease != null ?
+            lease : null;
     }
 
     @Override

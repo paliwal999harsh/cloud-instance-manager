@@ -1,7 +1,5 @@
 package com.paliwal999harsh.cloudinstancemanager.view;
 
-import java.time.LocalDateTime;
-
-public record LeaseView(String instanceName, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean alwaysOn, Boolean weekendOn) {
+public record LeaseView(String instanceName, String startDate, String endDate, String startTime, String endTime, Boolean alwaysOn, Boolean weekendOn) {
     
 }

@@ -182,8 +182,10 @@ public class InstanceController{
         @RequestParam(value = "cloudProvider", required = false, defaultValue = "AWS") CloudProvider cloud){
         List<InstanceView> instances = mapper.entityListToViewList(awsService.getAllInstances());  
         return instances != null ?
-            ResponseEntity.ok().body(mapper) :  
+            ResponseEntity.ok().body(instances) :  
             ResponseEntity.noContent().build();
+        //TODO when instances are terminated, the document remains in the collection, and it list that instance to
+        //TODO When we try to put a terminated instance to some state it throws exception, unhandled, 500 Internal Server Exception 
     }
 
     @GetMapping(

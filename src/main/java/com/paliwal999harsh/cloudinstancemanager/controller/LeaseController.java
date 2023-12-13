@@ -82,7 +82,7 @@ public class LeaseController{
             return ResponseEntity.notFound().build();
         }
 
-        LeaseEntity lease = awsService.updateLease(mapper.viewToEntity(leaseRequest));
+        LeaseEntity lease = awsService.updateLease(leaseRequest);
         return lease !=null?
             ResponseEntity.accepted().body(mapper.entityToView(lease)) :
             ResponseEntity.unprocessableEntity().build(); 
