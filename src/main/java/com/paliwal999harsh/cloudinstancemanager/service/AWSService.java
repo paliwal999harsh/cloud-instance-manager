@@ -1,5 +1,7 @@
 package com.paliwal999harsh.cloudinstancemanager.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -14,8 +16,6 @@ import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.repository.InstanceRepo;
 import com.paliwal999harsh.cloudinstancemanager.repository.LeaseRepo;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
@@ -55,8 +55,9 @@ public class AWSService implements LeaseService,InstanceService{
             .client(ec2)
             .build();
     }
+
     @Override
-    public Mono<InstanceEntity> createInstance(String instanceName) {
+    public InstanceEntity createInstance(String instanceName) {
         String amiId = "ami-0287a05f0ef0e9d9a";
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .imageId(amiId)
@@ -72,7 +73,7 @@ public class AWSService implements LeaseService,InstanceService{
 			        instanceId, amiId);
 
 			InstanceEntity instance = new InstanceEntity(instanceId,instanceName,CloudProvider.AWS,null);
-			Mono<InstanceEntity> result = instanceRepo.save(instance);
+			InstanceEntity result = instanceRepo.save(instance);
 			return result;
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
@@ -83,9 +84,9 @@ public class AWSService implements LeaseService,InstanceService{
 
     @Override
     public String getInstanceStatus(String instanceName) {
-        Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(instanceName);
+        InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
         DescribeInstancesRequest instanceRequest = DescribeInstancesRequest.builder()
-            .instanceIds(instance.block().getInstanceId())
+            .instanceIds(instance.getInstanceId())
             .build();
             
         try {
@@ -100,22 +101,20 @@ public class AWSService implements LeaseService,InstanceService{
     }
 
     @Override
-    public Flux<InstanceEntity> getAllInstances() {
+    public List<InstanceEntity> getAllInstances() {
         String nextToken = null;
         try{
             do {
                 DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
                 DescribeInstancesResponse response;
 				try {
-                    Flux<InstanceEntity> instances = Flux.empty();
+                    List<InstanceEntity> instances = new ArrayList<>();
 					response = ec2.describeInstances(request).get();
 					for (Reservation reservation : response.reservations()) {
-					    instances = Flux.concat(instances, Flux.fromIterable(
-					    reservation.instances().stream().map(instance -> {
-					    return new InstanceEntity(instance.instanceId(), instance.publicDnsName(), CloudProvider.AWS,null);
-					    }).collect(Collectors.toList())));
-                        instanceRepo.saveAll(instances).subscribe();
-					}
+                        instances.addAll(reservation.instances().stream().map(instance -> {
+                            return new InstanceEntity(instance.instanceId(), instance.publicDnsName(), CloudProvider.AWS, null);
+                        }).collect(Collectors.toList()));
+                    }                
                     nextToken = response.nextToken();
 				} catch (InterruptedException | ExecutionException e) {
 					// TODO Auto-generated catch block
@@ -131,65 +130,60 @@ public class AWSService implements LeaseService,InstanceService{
     }
 
     @Override
-    public Mono<LeaseEntity> updateLease(LeaseEntity lease) {
+    public LeaseEntity updateLease(LeaseEntity lease) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updateLease'");
     }
 
     @Override
-    public Mono<LeaseEntity> getLease(String instanceName) {
-        // Mono<LeaseDTO> leaseResponse;
-        // Mono<Lease> leaseInRepo = leaseRepo.findLeaseByInstanceName(lease.getInstance().getInstanceName());
-        // leaseResponse = leaseInRepo.flatMap(leaseResponse).onErrorStop();
-        return null;
+    public LeaseEntity getLease(String instanceName) {
+        return leaseRepo.findLeaseByInstanceName(instanceName);
     }
 
     @Override
-    public Mono<Void> stopInstance(String instanceName) {
-        Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(instanceName);
+    public void stopInstance(String instanceName) {
+        InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
         StopInstancesRequest request = StopInstancesRequest.builder()
-                .instanceIds(instance.block().getInstanceId())
+                .instanceIds(instance.getInstanceId())
                 .build();
 
         ec2.stopInstances(request);
         DescribeInstancesRequest instanceRequest = DescribeInstancesRequest.builder()
-            .instanceIds(instance.block().getInstanceId())
+            .instanceIds(instance.getInstanceId())
             .build();
             
         WaiterResponse<DescribeInstancesResponse> waiterResponse;
         try {
             waiterResponse = ec2Waiter.waitUntilInstanceStopped(instanceRequest).get();
             waiterResponse.matched().response().ifPresent(System.out::println);
-            log.info("Successfully stopped instance {}",instance.block().getInstanceId());
+            log.info("Successfully stopped instance {}",instance.getInstanceId());
         } catch (InterruptedException | ExecutionException e) {
             log.atError().notify();
             log.error("Unable to stop the instance, Exception Occureed:",e);
         }
-        return null;
     }
 
     @Override
-    public Mono<Void> startInstance(String instanceName) {
-        Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(instanceName);
+    public void startInstance(String instanceName) {
+        InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
         StartInstancesRequest request = StartInstancesRequest.builder()
-                .instanceIds(instance.block().getInstanceId())
+                .instanceIds(instance.getInstanceId())
                 .build();
 
         ec2.startInstances(request);
         DescribeInstancesRequest instanceRequest = DescribeInstancesRequest.builder()
-            .instanceIds(instance.block().getInstanceId())
+            .instanceIds(instance.getInstanceId())
             .build();
             
         WaiterResponse<DescribeInstancesResponse> waiterResponse;
         try {
             waiterResponse = ec2Waiter.waitUntilInstanceRunning(instanceRequest).get();
             waiterResponse.matched().response().ifPresent(System.out::println);
-            log.info("Successfully started instance {}",instance.block().getInstanceId());
+            log.info("Successfully started instance {}",instance.getInstanceId());
         } catch (InterruptedException | ExecutionException e) {
             log.atError().notify();
             log.error("Unable to start the instance, Exception Occureed:",e);
         }
-        return null;
     }
     
     

@@ -22,8 +22,6 @@ import com.paliwal999harsh.cloudinstancemanager.repository.InstanceRepo;
 import com.paliwal999harsh.cloudinstancemanager.service.AWSService;
 import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 
-import reactor.core.publisher.Mono;
-
 @RestController
 @RequestMapping("cim/api/v1/lease")
 @Validated
@@ -52,14 +50,14 @@ public class LeaseController{
         @Size(max = 15) 
         @Valid @RequestParam(value = "instanceName", required = true) String instanceName) {
         
-        Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(instanceName);
-        if(instance.block()==null){
+        InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
+        if(instance==null){
             return ResponseEntity.notFound().build();
         }
         
-        Mono<LeaseEntity> lease = awsService.getLease(instanceName);
-        return lease.block() != null?
-            ResponseEntity.ok(mapper.entityToView(lease.block())):
+        LeaseEntity lease = awsService.getLease(instanceName);
+        return lease != null?
+            ResponseEntity.ok(mapper.entityToView(lease)):
             ResponseEntity.internalServerError().build();
 
     }
@@ -79,14 +77,14 @@ public class LeaseController{
     public ResponseEntity<LeaseView> updateLease(
         @Valid @RequestBody LeaseView leaseRequest) {
         
-        Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(leaseRequest.instanceName());
-        if(instance.block()==null){
+        InstanceEntity instance = instanceRepo.findByInstanceName(leaseRequest.instanceName());
+        if(instance==null){
             return ResponseEntity.notFound().build();
         }
 
-        Mono<LeaseEntity> lease = awsService.updateLease(mapper.viewToEntity(leaseRequest));
-        return lease.block() !=null?
-            ResponseEntity.accepted().body(mapper.entityToView(lease.block())) :
+        LeaseEntity lease = awsService.updateLease(mapper.viewToEntity(leaseRequest));
+        return lease !=null?
+            ResponseEntity.accepted().body(mapper.entityToView(lease)) :
             ResponseEntity.unprocessableEntity().build(); 
 
     }

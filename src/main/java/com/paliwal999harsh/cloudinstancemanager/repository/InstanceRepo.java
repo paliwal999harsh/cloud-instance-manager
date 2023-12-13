@@ -1,15 +1,13 @@
 package com.paliwal999harsh.cloudinstancemanager.repository;
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.paliwal999harsh.cloudinstancemanager.model.InstanceEntity;
 
-import reactor.core.publisher.Mono;
-
 @Repository
-public interface InstanceRepo extends ReactiveCrudRepository<InstanceEntity, String>{
+public interface InstanceRepo extends MongoRepository<InstanceEntity, String>{
 
-    Mono<InstanceEntity> findByInstanceName(String instanceName);
+    InstanceEntity findByInstanceName(String instanceName);
 
 }

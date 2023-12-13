@@ -30,7 +30,6 @@ import com.paliwal999harsh.cloudinstancemanager.service.AWSService;
 import com.paliwal999harsh.cloudinstancemanager.view.InstanceView;
 
 import jakarta.validation.constraints.NotBlank;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("cim/api/v1/instances")
@@ -70,7 +69,7 @@ public class InstanceController{
             return ResponseEntity.badRequest().body("Instance name is not provided.");
         }
 
-        Mono<InstanceEntity> instance = null;
+        InstanceEntity instance = null;
         switch (instanceRequest.getCloud()) {
             case AWS:
                 instance = awsService.createInstance(instanceRequest.getInstanceName());
@@ -101,9 +100,9 @@ public class InstanceController{
         @Size(max = 15) 
         @PathVariable("instanceName") String instanceName){
         
-        Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(instanceName);
+        InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
         return instance != null ?
-            ResponseEntity.ok(mapper.entityToView(instance.block())):
+            ResponseEntity.ok(mapper.entityToView(instance)):
             ResponseEntity.notFound().build();
     }
     
@@ -125,8 +124,8 @@ public class InstanceController{
         @Size(max = 15) 
         @PathVariable("instanceName") String instanceName,
         @Valid @RequestParam(value = "setState", required = false) String setState){
-            Mono<InstanceEntity> instance = instanceRepo.findByInstanceName(instanceName);
-            if(instance.block()==null){
+            InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
+            if(instance==null){
                 return ResponseEntity.notFound().build();
             }
             String currentState = awsService.getInstanceStatus(instanceName);

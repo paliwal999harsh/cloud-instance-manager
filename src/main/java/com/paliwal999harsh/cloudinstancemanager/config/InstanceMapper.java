@@ -9,8 +9,6 @@ import org.mapstruct.Mappings;
 import com.paliwal999harsh.cloudinstancemanager.model.InstanceEntity;
 import com.paliwal999harsh.cloudinstancemanager.view.InstanceView;
 
-import reactor.core.publisher.Flux;
-
 @Mapper(componentModel = "spring")
 public interface InstanceMapper {
     
@@ -21,17 +19,7 @@ public interface InstanceMapper {
     })
     InstanceEntity viewToEntity(InstanceView instanceView);
 
-    default List<InstanceView> entityListToViewList(Lis<InstanceEntity> instanceEntities) {
-        return instanceEntities
-                .map(this::entityToView)
-                .collectList()
-                .block();
-    }
+    List<InstanceView> entityListToViewList(List<InstanceEntity> instanceEntities);
 
-    default List<InstanceEntity> viewListToEntityList(Flux<InstanceView> instanceViews) {
-        return instanceViews
-                .map(this::viewToEntity)
-                .collectList()
-                .block();
-    }
+    List<InstanceEntity> viewListToEntityList(List<InstanceView> instanceViews);
 }

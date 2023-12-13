@@ -9,8 +9,6 @@ import org.mapstruct.Mappings;
 import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 
-import reactor.core.publisher.Flux;
-
 @Mapper(componentModel = "spring")
 public interface LeaseMapper {
     
@@ -25,19 +23,9 @@ public interface LeaseMapper {
     })
     LeaseEntity viewToEntity(LeaseView leaseView);
 
-    default List<LeaseView> entityListToViewList(Flux<LeaseEntity> leaseEntities) {
-        return leaseEntities
-                .map(this::entityToView)
-                .collectList()
-                .block();
-    }
+    List<LeaseView> entityListToViewList(List<LeaseEntity> leaseEntities);
 
-    default List<LeaseEntity> viewListToEntityList(Flux<LeaseView> leaseViews) {
-        return leaseViews
-                .map(this::viewToEntity)
-                .collectList()
-                .block();
-    }
+    List<LeaseEntity> viewListToEntityList(List<LeaseView> leaseViews);
 
     // @Named(value ="mapInstanceEntity")
     // public static InstanceEntity mapInstanceEntity(String instanceName){
