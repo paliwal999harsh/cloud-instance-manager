@@ -39,3 +39,6 @@ out/
 
 ### MongoDB Data ###
 mongodb/
+
+### docker compose file ###
+compose.yaml

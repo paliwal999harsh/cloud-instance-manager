@@ -2,14 +2,18 @@ pipeline {
     agent any
 
     stages {
-        // stage('Checkout') {
-        //     steps {
-        //         checkout scm
-        //     }
-        // }
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Bring Container Down'){
-            echo 'Stopping the Container...'
-            sh 'docker-compose down'
+            steps{
+                script{
+                    echo 'Stopping the Container...'
+                    sh 'docker-compose down'
+                }
+            }
         }
         stage('Remove Docker Image') {
             steps {
@@ -21,26 +25,34 @@ pipeline {
         }
         stage('Build') {
             steps {
-                echo 'Building the application...'
-                sh 'gradle build bootJar'
+                script{
+                    echo 'Building the application...'
+                    sh 'gradle build bootJar'
+                }
             }
         }
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                sh 'gradle test'
+                script{
+                    echo 'Running tests...'
+                    sh 'gradle test'
+                }
             }
         }
         stage('Deploy the Container') {
             steps {
-                echo 'Deploying the application...'
-                sh 'docker-compose up --build --detach'
+                script{
+                    echo 'Deploying the application...'
+                    sh 'docker-compose up --build --detach'
+                }
             }
         }
         stage('Cleanup'){
             steps{
-                echo 'Performing Cleanup...'
-                sh 'docker image prune -f'
+                script{
+                    echo 'Performing Cleanup...'
+                    sh 'docker image prune -f'
+                }
             }
         }
     }
