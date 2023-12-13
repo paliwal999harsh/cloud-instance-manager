@@ -23,8 +23,8 @@ services:
     mem_limit: 512m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - AWS_ACCESS_KEY_ID=AKIAUH7QEFTXTVZEVQOK
-      - AWS_SECRET_ACCESS_KEY=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  
+      - AWS_ACCESS_KEY_ID=access_key
+      - AWS_SECRET_ACCESS_KEY=secret_key  
     ports:
       - "8080:8080"
     depends_on:
