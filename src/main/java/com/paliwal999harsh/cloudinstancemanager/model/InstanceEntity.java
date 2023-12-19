@@ -1,9 +1,11 @@
 package com.paliwal999harsh.cloudinstancemanager.model;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,9 +13,16 @@ import lombok.Data;
 
 @Document(collection="instances")
 @Data
+@Validated
 public class InstanceEntity{
 
-    @Id @NotEmpty
+    @Transient
+    public static final String SEQUENCE_NAME = "instance_entity_sequence";
+
+    @MongoId @NotEmpty
+    private Long id;
+    
+    @Indexed(unique = true) @NotEmpty
     private final String instanceId;
     
     @Indexed(unique = true)
@@ -23,6 +32,6 @@ public class InstanceEntity{
     private final CloudProvider cloud;
 
     @Version
-    private final Integer version;
+    private Integer version;
 
 }

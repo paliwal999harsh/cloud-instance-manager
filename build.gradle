@@ -54,6 +54,10 @@ dependencies {
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.testcontainers:testcontainers:1.16.0'
+	testImplementation 'org.testcontainers:junit-jupiter:1.16.0'
+	testImplementation 'org.testcontainers:mongodb:1.16.0'
+
 	// testImplementation 'org.springframework.security:spring-security-test'
 
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"

@@ -56,16 +56,22 @@ public class InstanceController{
          value = "/create",
          produces = { "application/json" },
          consumes = { "application/json" }
-     )
+    )
     public ResponseEntity<Object> createInstance(
         @Valid @RequestBody InstanceRequestDTO instanceRequest) {
+        
+        if(log.isDebugEnabled()){
+            log.debug("Instance Request DTO: {}",instanceRequest.toString());
+        }
 
         if(!CloudProvider.isValid(instanceRequest.getCloud())){
-            log.info("cloud type is not provided/valid, taking default 'AWS'.");
+            if(log.isDebugEnabled())
+                log.debug("cloud type is not provided/valid, taking default 'AWS'.");
             instanceRequest.setCloud(CloudProvider.AWS);
         }
 
         if(instanceRequest.getInstanceName().isEmpty()){
+            log.info("Instance name is not provided. BAD_REQUEST");
             return ResponseEntity.badRequest().body("Instance name is not provided.");
         }
 
@@ -198,3 +204,6 @@ public class InstanceController{
             ResponseEntity.notFound().build();
     }
 }
+
+//TODO org.springframework.dao.DuplicateKeyException: Write operation error on server mongo:27017. Write error: WriteError{code=11000, message='E11000 duplicate key error collection: CIM_DB.instances index: instanceId dup key: { instanceId: "SampleServer02" }', details={}}.
+

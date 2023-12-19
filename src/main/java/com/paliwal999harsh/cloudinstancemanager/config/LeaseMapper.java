@@ -12,14 +12,13 @@ import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 @Mapper(componentModel = "spring")
 public interface LeaseMapper {
     
-    @Mappings({
-        @Mapping(target = "instanceName", source = "leaseEntity.instance.instanceName")
-    })
     LeaseView entityToView(LeaseEntity leaseEntity);
     
     @Mappings({
-        @Mapping(target = "version", ignore = true)
-       // @Mapping(source = "instanceName", target = "instance", qualifiedByName = "mapInstanceEntity")
+        @Mapping(target = "version", ignore = true),
+        @Mapping(target = "id", ignore = true),
+        @Mapping(target = "sysCreatedOn", ignore = true),
+        @Mapping(target = "sysUpdatedOn", ignore = true)
     })
     LeaseEntity viewToEntity(LeaseView leaseView);
 

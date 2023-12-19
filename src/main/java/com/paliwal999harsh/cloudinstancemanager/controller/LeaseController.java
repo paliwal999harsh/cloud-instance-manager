@@ -42,7 +42,7 @@ public class LeaseController{
      */
 
     @GetMapping(
-        value = "/",
+        value = "",
         produces = { "application/json" }
     )
     public ResponseEntity<LeaseView> getLease(

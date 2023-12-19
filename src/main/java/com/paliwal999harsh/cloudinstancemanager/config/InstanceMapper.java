@@ -15,7 +15,8 @@ public interface InstanceMapper {
     InstanceView entityToView(InstanceEntity instanceEntity);
     
     @Mappings({
-        @Mapping(target = "version", ignore = true)
+        @Mapping(target = "version", ignore = true),
+        @Mapping(target = "id", ignore = true)
     })
     InstanceEntity viewToEntity(InstanceView instanceView);
 

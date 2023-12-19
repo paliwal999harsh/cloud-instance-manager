@@ -2,7 +2,6 @@ package com.paliwal999harsh.cloudinstancemanager.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.Ec2AsyncClient;
+import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
@@ -32,7 +31,7 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.Tag;
-import software.amazon.awssdk.services.ec2.waiters.Ec2AsyncWaiter;
+import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 @Service
 public class AWSService implements LeaseService,InstanceService{
@@ -42,18 +41,18 @@ public class AWSService implements LeaseService,InstanceService{
     InstanceRepo instanceRepo;
     LeaseRepo leaseRepo;
     static Region region = Region.AP_SOUTH_1;
-    Ec2AsyncClient ec2;
-    Ec2AsyncWaiter ec2Waiter;
+    Ec2Client ec2;
+    Ec2Waiter ec2Waiter;
     
     @Autowired
     AWSService(InstanceRepo instanceRepo, LeaseRepo leaseRepo){
         this.instanceRepo = instanceRepo;
         this.leaseRepo = leaseRepo;
-        ec2 = Ec2AsyncClient.builder()
+        ec2 = Ec2Client.builder()
             .region(region)
             .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
             .build();
-        ec2Waiter = Ec2AsyncWaiter.builder()
+        ec2Waiter = Ec2Waiter.builder()
             .overrideConfiguration(b -> b.maxAttempts(100))
             .client(ec2)
             .build();
@@ -69,7 +68,7 @@ public class AWSService implements LeaseService,InstanceService{
                 .minCount(1)
                 .build();
         try {
-			RunInstancesResponse response = ec2.runInstances(runRequest).get();
+			RunInstancesResponse response = ec2.runInstances(runRequest);
 			String instanceId = response.instances().get(0).instanceId();
             Tag tag = Tag.builder()
                     .key("Name")
@@ -82,8 +81,7 @@ public class AWSService implements LeaseService,InstanceService{
             ec2.createTags(tagRequest);
 			log.info("Successfully started EC2 Instance {} based on AMI {}",
 			        instanceId, amiId);
-
-			InstanceEntity instance = new InstanceEntity(instanceId,instanceName,CloudProvider.AWS,null);
+			InstanceEntity instance = new InstanceEntity(instanceName,instanceName,CloudProvider.AWS);
 			InstanceEntity result = instanceRepo.save(instance);
             leaseRepo.save(createLease(result));
 			return result;
@@ -95,7 +93,7 @@ public class AWSService implements LeaseService,InstanceService{
             // Rethrow the exception or handle it accordingly
             throw e;
         } 
-        catch (InterruptedException | ExecutionException e) {
+        catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -110,10 +108,10 @@ public class AWSService implements LeaseService,InstanceService{
             .build();
             
         try {
-            DescribeInstancesResponse instancesResponse = ec2.describeInstances(instanceRequest).get();
+            DescribeInstancesResponse instancesResponse = ec2.describeInstances(instanceRequest);
             String state = instancesResponse.reservations().get(0).instances().get(0).state().name().name();
             return state;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -129,14 +127,14 @@ public class AWSService implements LeaseService,InstanceService{
                 DescribeInstancesResponse response;
 				try {
                     List<InstanceEntity> instances = new ArrayList<>();
-					response = ec2.describeInstances(request).get();
+					response = ec2.describeInstances(request);
 					for (Reservation reservation : response.reservations()) {
                         instances.addAll(reservation.instances().stream().map(instance -> {
-                            return new InstanceEntity(instance.instanceId(), instance.publicDnsName(), CloudProvider.AWS, null);
+                            return new InstanceEntity(instance.instanceId(), instance.publicDnsName(), CloudProvider.AWS);
                         }).collect(Collectors.toList()));
                     }                
                     nextToken = response.nextToken();
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -183,10 +181,10 @@ public class AWSService implements LeaseService,InstanceService{
             
         WaiterResponse<DescribeInstancesResponse> waiterResponse;
         try {
-            waiterResponse = ec2Waiter.waitUntilInstanceStopped(instanceRequest).get();
+            waiterResponse = ec2Waiter.waitUntilInstanceStopped(instanceRequest);
             waiterResponse.matched().response().ifPresent(System.out::println);
             log.info("Successfully stopped instance {}",instance.getInstanceId());
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             log.atError().notify();
             log.error("Unable to stop the instance, Exception Occureed:",e);
         }
@@ -206,10 +204,10 @@ public class AWSService implements LeaseService,InstanceService{
             
         WaiterResponse<DescribeInstancesResponse> waiterResponse;
         try {
-            waiterResponse = ec2Waiter.waitUntilInstanceRunning(instanceRequest).get();
+            waiterResponse = ec2Waiter.waitUntilInstanceRunning(instanceRequest);
             waiterResponse.matched().response().ifPresent(System.out::println);
             log.info("Successfully started instance {}",instance.getInstanceId());
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             log.atError().notify();
             log.error("Unable to start the instance, Exception Occureed:",e);
         }

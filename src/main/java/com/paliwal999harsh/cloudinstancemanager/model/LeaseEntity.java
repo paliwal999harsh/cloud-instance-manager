@@ -1,24 +1,40 @@
 package com.paliwal999harsh.cloudinstancemanager.model;
 
+import java.time.LocalDateTime;
+
 import javax.validation.constraints.Pattern;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Document(collection="lease")
 @Data
-@AllArgsConstructor
+@Validated
+@EnableMongoAuditing
 public class LeaseEntity{
-    @Id 
-    @NotNull
-    @Valid
-    private final InstanceEntity instance;
+
+    @Transient
+    public static final String SEQUENCE_NAME = "lease_entity_sequence";
+
+    @MongoId @NotEmpty
+    private Long id;
+
+    @Indexed(unique = true)
+    @NotNull @Valid @NotEmpty
+    private final String instanceName;
 
     @NotNull
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Invalid date format. Use yyyy-MM-dd.")
@@ -42,6 +58,14 @@ public class LeaseEntity{
     @NotNull
     private Boolean weekendOn;
 
+    @NotNull @Field(value="sys_created_on")
+    @CreatedDate
+    private LocalDateTime sysCreatedOn;
+
+    @NotNull @Field(value="sys_updated_on")
+    @LastModifiedDate
+    private LocalDateTime sysUpdatedOn;
+
     @Version 
-    private final Integer version;
+    private Integer version;
 }
