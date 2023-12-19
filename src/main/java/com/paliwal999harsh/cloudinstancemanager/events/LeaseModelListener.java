@@ -1,12 +1,9 @@
 package com.paliwal999harsh.cloudinstancemanager.events;
 
-import java.time.LocalDateTime;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
-import org.springframework.data.mongodb.core.mapping.event.BeforeSaveEvent;
 import org.springframework.stereotype.Component;
 
 import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
@@ -31,11 +28,11 @@ public class LeaseModelListener extends AbstractMongoEventListener<LeaseEntity> 
         }
     }
 
-    @Override
-    public void onBeforeSave(BeforeSaveEvent<LeaseEntity> event){
-        event.getSource().setSysUpdatedOn(LocalDateTime.now());
-    }
-    
+    // @Override
+    // public void onBeforeSave(BeforeSaveEvent<LeaseEntity> event){
+    //     event.getSource().setSysUpdatedOn(LocalDateTime.now());
+    // }
+    //TODO sys_updated_on not working
     @Override
     public void onAfterSave(AfterSaveEvent<LeaseEntity> event){
         triggerGenerator.generateStartAndStopActions(event.getSource());
