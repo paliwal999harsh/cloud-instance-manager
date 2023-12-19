@@ -41,37 +41,34 @@ public class TriggerGeneratorService {
 
         String instanceName = lease.getInstanceName();
 
-        if(Boolean.logicalAnd(alwaysOn, weekendOn)){
-            triggerRepo.save(new Trigger(instanceName, startDate.atTime(startTime),START_ACTION,lease));
-            triggerRepo.save(new Trigger(instanceName, endDate.atTime(endTime), STOP_ACTION,lease));
-        }
-        else if(Boolean.logicalAnd(alwaysOn,!weekendOn)){
-            for(LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)){
-                if(date.getDayOfWeek().equals(DayOfWeek.FRIDAY)){
-                    triggerRepo.save(new Trigger(instanceName, date.atTime(endTime), STOP_ACTION,lease));
+        //At first we have to start the instance regardless of any condition
+        triggerRepo.save(new Trigger(instanceName, startDate.atTime(startTime),START_ACTION,lease));
+        
+        for(LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)){
+            if(Boolean.logicalAnd(alwaysOn,!weekendOn)){
+                if(date.getDayOfWeek().equals(DayOfWeek.SATURDAY)){
+                    triggerRepo.save(new Trigger(instanceName, date.atTime(LocalTime.MIDNIGHT), STOP_ACTION,lease));
                 }
                 if(date.getDayOfWeek().equals(DayOfWeek.MONDAY)){
-                    triggerRepo.save(new Trigger(instanceName, date.atTime(startTime), START_ACTION,lease));
+                    triggerRepo.save(new Trigger(instanceName, date.atTime(LocalTime.MIN), START_ACTION,lease));
                 }
             }
-        }
-        else if(Boolean.logicalAnd(!alwaysOn,weekendOn)){
-            for(LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)){
-                triggerRepo.save(new Trigger(instanceName, date.atTime(startTime), START_ACTION,lease));
+            else if(Boolean.logicalAnd(!alwaysOn,weekendOn)){
+                triggerRepo.save(new Trigger(instanceName, date.atTime(st   artTime), START_ACTION,lease));
                 triggerRepo.save(new Trigger(instanceName, date.atTime(endTime), STOP_ACTION,lease));
             }
-        }
-        else if(Boolean.logicalAnd(!alwaysOn,!weekendOn)){
-            for(LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)){
+            else if(Boolean.logicalAnd(!alwaysOn,!weekendOn)){
                 if(date.getDayOfWeek().equals(DayOfWeek.SATURDAY) || 
                     date.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
                     continue;
                 }
-
+                
                 triggerRepo.save(new Trigger(instanceName, date.atTime(startTime), START_ACTION,lease));
                 triggerRepo.save(new Trigger(instanceName, date.atTime(endTime), STOP_ACTION,lease));
             }
         }
-    }
-    
+
+        //Atlast we have to stop the instance
+        triggerRepo.save(new Trigger(instanceName, endDate.atTime(endTime), STOP_ACTION,lease));
+    }   
 }
