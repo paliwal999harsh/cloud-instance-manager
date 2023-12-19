@@ -11,43 +11,33 @@ import org.springframework.stereotype.Service;
 
 import com.paliwal999harsh.cloudinstancemanager.model.CloudProvider;
 import com.paliwal999harsh.cloudinstancemanager.model.InstanceEntity;
-import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.repository.InstanceRepo;
-import com.paliwal999harsh.cloudinstancemanager.repository.LeaseRepo;
-import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
-import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Reservation;
-import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 @Service
-public class AWSService implements LeaseService,InstanceService{
+public class AWSService implements InstanceService{
 
     private static Logger log = LoggerFactory.getLogger(AWSService.class);
 
     InstanceRepo instanceRepo;
-    LeaseRepo leaseRepo;
     static Region region = Region.AP_SOUTH_1;
     Ec2Client ec2;
     Ec2Waiter ec2Waiter;
     
     @Autowired
-    AWSService(InstanceRepo instanceRepo, LeaseRepo leaseRepo){
+    AWSService(InstanceRepo instanceRepo){
         this.instanceRepo = instanceRepo;
-        this.leaseRepo = leaseRepo;
         ec2 = Ec2Client.builder()
             .region(region)
             .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
@@ -58,33 +48,37 @@ public class AWSService implements LeaseService,InstanceService{
             .build();
     }
 
+    /**
+     * Creates a new AWS EC2 instance.
+     *
+     * @param instanceName The name of the new instance.
+     * @return The created InstanceEntity.
+     */
     @Override
     public InstanceEntity createInstance(String instanceName) {
-        String amiId = "ami-02a2af70a66af6dfb";
-        RunInstancesRequest runRequest = RunInstancesRequest.builder()
-                .imageId(amiId)
-                .instanceType(InstanceType.T2_MICRO)
-                .maxCount(1)
-                .minCount(1)
-                .build();
+        // String amiId = "ami-02a2af70a66af6dfb";
+        // RunInstancesRequest runRequest = RunInstancesRequest.builder()
+        //         .imageId(amiId)
+        //         .instanceType(InstanceType.T2_MICRO)
+        //         .maxCount(1)
+        //         .minCount(1)
+        //         .build();
         try {
-			RunInstancesResponse response = ec2.runInstances(runRequest);
-			String instanceId = response.instances().get(0).instanceId();
-            Tag tag = Tag.builder()
-                    .key("Name")
-                    .value(instanceName)
-                    .build();
-            CreateTagsRequest tagRequest = CreateTagsRequest.builder()
-            .resources(instanceId)
-            .tags(tag)
-            .build();
-            ec2.createTags(tagRequest);
-			log.info("Successfully started EC2 Instance {} based on AMI {}",
-			        instanceId, amiId);
+			// RunInstancesResponse response = ec2.runInstances(runRequest);
+			// String instanceId = response.instances().get(0).instanceId();
+            // Tag tag = Tag.builder()
+            //         .key("Name")
+            //         .value(instanceName)
+            //         .build();
+            // CreateTagsRequest tagRequest = CreateTagsRequest.builder()
+            // .resources(instanceId)
+            // .tags(tag)
+            // .build();
+            // ec2.createTags(tagRequest);
+			// log.info("Successfully started EC2 Instance {} based on AMI {}",
+			//         instanceId, amiId);
 			InstanceEntity instance = new InstanceEntity(instanceName,instanceName,CloudProvider.AWS);
-			InstanceEntity result = instanceRepo.save(instance);
-            leaseRepo.save(createLease(result));
-			return result;
+			return instanceRepo.save(instance);
 		}
         catch (Ec2Exception e) {
             // Log the exception details
@@ -100,6 +94,12 @@ public class AWSService implements LeaseService,InstanceService{
         return null;
     }
 
+    /**
+     * Retrieves the status of a specific AWS EC2 instance.
+     *
+     * @param instanceName The name of the instance.
+     * @return The status of the specified instance.
+     */
     @Override
     public String getInstanceStatus(String instanceName) {
         InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
@@ -118,6 +118,11 @@ public class AWSService implements LeaseService,InstanceService{
         return null;
     }
 
+    /**
+     * Retrieves information about all AWS EC2 instances.
+     *
+     * @return A list of all InstanceEntity objects.
+     */
     @Override
     public List<InstanceEntity> getAllInstances() {
         String nextToken = null;
@@ -147,26 +152,11 @@ public class AWSService implements LeaseService,InstanceService{
         return instanceRepo.findAll();
     }
 
-    @Override
-    public LeaseEntity updateLease(LeaseView leaseRequest) {
-        LeaseEntity lease = leaseRepo.findLeaseByInstanceName(leaseRequest.instanceName());
-        lease.setAlwaysOn(leaseRequest.alwaysOn());
-        lease.setWeekendOn(leaseRequest.weekendOn());
-        lease.setStartDate(leaseRequest.startDate());
-        lease.setEndDate(leaseRequest.endDate());
-        lease.setStartTime(leaseRequest.startTime());
-        lease.setEndTime(leaseRequest.endTime());
-        lease = leaseRepo.save(lease);
-        //TODO setup firetime for start and stop the instance
-        return lease != null ?
-            lease : null;
-    }
-
-    @Override
-    public LeaseEntity getLease(String instanceName) {
-        return leaseRepo.findLeaseByInstanceName(instanceName);
-    }
-
+    /**
+     * Stops an AWS EC2 instance.
+     *
+     * @param instanceName The name of the instance to stop.
+     */
     @Override
     public void stopInstance(String instanceName) {
         InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);
@@ -190,6 +180,11 @@ public class AWSService implements LeaseService,InstanceService{
         }
     }
 
+    /**
+     * Starts an AWS EC2 instance.
+     *
+     * @param instanceName The name of the instance to start.
+     */
     @Override
     public void startInstance(String instanceName) {
         InstanceEntity instance = instanceRepo.findByInstanceName(instanceName);

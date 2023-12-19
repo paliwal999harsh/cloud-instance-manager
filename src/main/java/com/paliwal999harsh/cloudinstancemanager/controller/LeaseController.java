@@ -20,6 +20,7 @@ import com.paliwal999harsh.cloudinstancemanager.model.InstanceEntity;
 import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.repository.InstanceRepo;
 import com.paliwal999harsh.cloudinstancemanager.service.AWSService;
+import com.paliwal999harsh.cloudinstancemanager.service.LeaseService;
 import com.paliwal999harsh.cloudinstancemanager.view.LeaseView;
 
 @RestController
@@ -29,6 +30,9 @@ public class LeaseController{
     
     @Autowired
     AWSService awsService;
+
+    @Autowired
+    LeaseService leaseService;
 
     @Autowired
     InstanceRepo instanceRepo;
@@ -55,7 +59,7 @@ public class LeaseController{
             return ResponseEntity.notFound().build();
         }
         
-        LeaseEntity lease = awsService.getLease(instanceName);
+        LeaseEntity lease = leaseService.getLease(instanceName);
         return lease != null?
             ResponseEntity.ok(mapper.entityToView(lease)):
             ResponseEntity.internalServerError().build();
@@ -82,7 +86,7 @@ public class LeaseController{
             return ResponseEntity.notFound().build();
         }
 
-        LeaseEntity lease = awsService.updateLease(leaseRequest);
+        LeaseEntity lease = leaseService.updateLease(leaseRequest);
         return lease !=null?
             ResponseEntity.accepted().body(mapper.entityToView(lease)) :
             ResponseEntity.unprocessableEntity().build(); 

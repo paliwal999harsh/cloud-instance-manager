@@ -6,6 +6,7 @@ import javax.validation.constraints.NotEmpty;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
@@ -27,6 +28,9 @@ public class Trigger {
     private final LocalDateTime fireTime;
 
     private final String action;
+
+    @DBRef
+    private final LeaseEntity lease;
 
     @Version
     private Integer version;

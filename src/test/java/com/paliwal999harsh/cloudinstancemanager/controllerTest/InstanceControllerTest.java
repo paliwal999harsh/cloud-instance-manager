@@ -19,12 +19,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paliwal999harsh.cloudinstancemanager.config.InstanceMapper;
 import com.paliwal999harsh.cloudinstancemanager.controller.InstanceController;
 import com.paliwal999harsh.cloudinstancemanager.model.CloudProvider;
 import com.paliwal999harsh.cloudinstancemanager.model.InstanceEntity;
 import com.paliwal999harsh.cloudinstancemanager.repository.InstanceRepo;
+import com.paliwal999harsh.cloudinstancemanager.repository.LeaseRepo;
+import com.paliwal999harsh.cloudinstancemanager.repository.TriggerRepo;
 import com.paliwal999harsh.cloudinstancemanager.service.AWSService;
 import com.paliwal999harsh.cloudinstancemanager.service.SequenceGeneratorService;
 import com.paliwal999harsh.cloudinstancemanager.service.TriggerGeneratorService;
@@ -42,6 +43,12 @@ public class InstanceControllerTest {
 
     @MockBean
     private InstanceRepo instanceRepo;
+
+    @MockBean
+    private LeaseRepo leaseRepo;
+
+    @MockBean
+    private TriggerRepo triggerRepo;
     
     @MockBean
     private SequenceGeneratorService sequenceGenerator;
@@ -51,9 +58,6 @@ public class InstanceControllerTest {
 
     @InjectMocks
     private InstanceController instanceController;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private InstanceMapper mapper;
