@@ -75,6 +75,10 @@ public class InstanceController{
             return ResponseEntity.badRequest().body("Instance name is not provided.");
         }
 
+        if(instanceRepo.findByInstanceName(instanceRequest.getInstanceName()) != null){
+            log.info("Instance with the given name already exists");
+            return ResponseEntity.badRequest().body("Instance with given name already exists.");
+        }
         InstanceEntity instance = null;
         switch (instanceRequest.getCloud()) {
             case AWS:
