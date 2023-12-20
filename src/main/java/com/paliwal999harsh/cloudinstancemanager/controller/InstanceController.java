@@ -194,8 +194,6 @@ public class InstanceController{
         return instances != null ?
             ResponseEntity.ok().body(instances) :  
             ResponseEntity.noContent().build();
-        //TODO when instances are terminated, the document remains in the collection, and it list that instance to
-        //TODO When we try to put a terminated instance to some state it throws exception, unhandled, 500 Internal Server Exception 
     }
 
     @GetMapping(
@@ -208,6 +206,3 @@ public class InstanceController{
             ResponseEntity.notFound().build();
     }
 }
-
-//TODO org.springframework.dao.DuplicateKeyException: Write operation error on server mongo:27017. Write error: WriteError{code=11000, message='E11000 duplicate key error collection: CIM_DB.instances index: instanceId dup key: { instanceId: "SampleServer02" }', details={}}.
-

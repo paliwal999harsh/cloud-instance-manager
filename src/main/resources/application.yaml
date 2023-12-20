@@ -23,11 +23,7 @@ logging:
   level:
     root: INFO
 
-# Azure Configuration
-# azure:
-#   tenant-id: your_azure_tenant_id
-#   client-id: your_azure_client_id
-#   client-secret: your_azure_client_secret
+fixedRate.in.milliseconds: 600000
 
 ---
 spring:

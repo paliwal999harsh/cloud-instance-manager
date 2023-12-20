@@ -14,8 +14,8 @@ import lombok.Data;
 
 @Document(collection = "smart_triggers")
 @Data
-public class Trigger {
-    
+public class SmartTrigger {
+
     @Transient
     public static final String SEQUENCE_NAME = "smart_triggers_sequence";
 
@@ -24,7 +24,7 @@ public class Trigger {
 
     @NotEmpty
     private final String instanceName;
-    
+
     private final LocalDateTime fireTime;
 
     private final String action;

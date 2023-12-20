@@ -8,17 +8,17 @@ import org.springframework.stereotype.Component;
 
 import com.paliwal999harsh.cloudinstancemanager.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.service.SequenceGeneratorService;
-import com.paliwal999harsh.cloudinstancemanager.service.TriggerGeneratorService;
+import com.paliwal999harsh.cloudinstancemanager.service.SmartTriggerService;
 
 @Component
 public class LeaseModelListener extends AbstractMongoEventListener<LeaseEntity> {
     private SequenceGeneratorService sequenceGenerator;
-    private TriggerGeneratorService triggerGenerator;
+    private SmartTriggerService triggerService;
 
     @Autowired
-    public LeaseModelListener(SequenceGeneratorService sequenceGenerator, TriggerGeneratorService triggerGenerator) {
+    public LeaseModelListener(SequenceGeneratorService sequenceGenerator, SmartTriggerService triggerService) {
         this.sequenceGenerator = sequenceGenerator;
-        this.triggerGenerator = triggerGenerator;
+        this.triggerService = triggerService;
     }
 
     @Override
@@ -28,13 +28,8 @@ public class LeaseModelListener extends AbstractMongoEventListener<LeaseEntity> 
         }
     }
 
-    // @Override
-    // public void onBeforeSave(BeforeSaveEvent<LeaseEntity> event){
-    //     event.getSource().setSysUpdatedOn(LocalDateTime.now());
-    // }
-    //TODO sys_updated_on not working
     @Override
     public void onAfterSave(AfterSaveEvent<LeaseEntity> event){
-        triggerGenerator.generateStartAndStopActions(event.getSource());
+        triggerService.generateStartAndStopActions(event.getSource());
     }
 }

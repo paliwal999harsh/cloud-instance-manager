@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "fixedRate.in.milliseconds",
+      "type": "java.lang.Integer",
+      "description": "Property used to schedule set state actions"
+    }
+  ]
+}
