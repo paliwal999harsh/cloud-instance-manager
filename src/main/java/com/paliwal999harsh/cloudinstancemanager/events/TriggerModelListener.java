@@ -1,5 +1,7 @@
 package com.paliwal999harsh.cloudinstancemanager.events;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
@@ -23,6 +25,11 @@ public class TriggerModelListener extends AbstractMongoEventListener<SmartTrigge
         if (event.getSource().getId() == null) {
             event.getSource().setId(sequenceGenerator.generateSequence(SmartTrigger.SEQUENCE_NAME));
         }
+
+        LocalDateTime fireTime = event.getSource().getFireTime();
+        LocalDateTime expireAt = fireTime.plusMinutes(5);
+    
+        event.getSource().setExpireAt(expireAt);
     }
 
 }
