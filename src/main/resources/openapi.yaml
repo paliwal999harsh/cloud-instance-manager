@@ -5,7 +5,7 @@ info:
     description: Manage instance and lease of the instances
     contact:
         name: Harsh Paliwal
-        url: https://github.io/
+        url: https://github.io/projects/cloud-instance-manager
         email: paliwal.999harsh+cim@gmail.com
     license:
         name: Apache 2.0
@@ -17,6 +17,7 @@ servers:
         port:
             enum:
                 - '8080'
+                - '8081'
             default: '8080'
         basePath: 
             default: v1
@@ -30,7 +31,8 @@ paths:
               schema:
                   $ref: "#/components/schemas/InstanceName"
         get:
-            summary: Read a instance
+            operationId: Read a instance
+            description: Read a instance
             responses:
                 200:
                     description: The instance corresponding to the provided `instanceName`
@@ -51,7 +53,8 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/GlobalControllerException"
         delete:
-            summary: deletes the instance
+            operationId: Delete a instance
+            description: deletes the instance
             responses:
                 405:
                     description: Method not allowed
@@ -60,7 +63,8 @@ paths:
                             schema:
                                 type: string
         put:
-            summary: set the state of instance
+            operationId: Modify State of a instance
+            description: set the state of instance
             parameters:
                 - name: setState
                   description: the state of the instance, to start or stop the instance
@@ -96,7 +100,8 @@ paths:
               schema:
                   $ref: "#/components/schemas/CloudProvider"
         get:
-            summary: Read all the instances
+            operationId: Read all instances
+            description: Read all the instances
             responses:
                 200:
                     description: list all instances available in the cloud  
@@ -118,9 +123,10 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/InvalidCloudProviderException"
-    /instances/create:
+    /instances:
         post:
-            summary: will create a instance, with the request body provided
+            operationId: Create a instance
+            description: will create a instance, with the request body provided
             requestBody:
                 required: true
                 content:
@@ -134,7 +140,7 @@ paths:
                                 cloud:
                                     $ref: "#/components/schemas/CloudProvider"
             responses:
-                202:
+                201:
                     description: request is valid, and server accepted it.
                     content:
                         application/json:
@@ -146,9 +152,10 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/InvalidCloudProviderException"
-    /lease/update:
+    /lease:
         put:
-            summary: will create a lease, with the request body provided
+            operationId: Update Lease for a instance
+            description: will create a lease, with the request body provided
             requestBody:
                 required: true
                 content:
@@ -168,14 +175,14 @@ paths:
                                     type: boolean                          
             responses:
                 202:
-                    description: request is valid, and server accepted it.
+                    description: request is valid, and server processed it.
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/LeaseView"
-    /lease:
         get:
-            summary: Read a lease
+            operationId: Read a lease
+            description: Read a lease
             parameters:
                 - name: instanceName
                   description: the unique name of the instance
@@ -315,9 +322,3 @@ components:
                 message:
                     description: prompted cloud type is invalid
                     type: string
-    securitySchemes:
-        basicAuth:
-            type: http
-            scheme: basic
-security:
-  - basicAuth: []

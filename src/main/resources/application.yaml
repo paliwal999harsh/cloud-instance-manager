@@ -12,8 +12,6 @@ spring:
     mongodb:
       database: CIM_DB
       autoIndexCreation: true
-  thymeleaf:
-    check-template-location: true
 # Server Configuration
 server:
   port: 8080

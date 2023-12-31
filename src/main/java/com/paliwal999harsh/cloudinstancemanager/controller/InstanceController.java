@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,14 +47,14 @@ public class InstanceController{
 
     private final InstanceMapper mapper = Mappers.getMapper(InstanceMapper.class);
     /**
-     * POST /instances/create : will create a instance, with the request body provided
+     * POST /instances : will create a instance, with the request body provided
      *
      * @param InstanceRequest  (required)
      * @return request is valid, and server accepted it. (status code 202)
      *         or invalid cloud type provided (status code 418)
      */
      @PostMapping(
-         value = "/create",
+         value = "",
          produces = { "application/json" },
          consumes = { "application/json" }
     )
@@ -183,6 +184,7 @@ public class InstanceController{
      *         or no instances are available in the cloud (status code 204)
      *         or invalid cloud provider provided (status code 400)
      */
+    @CrossOrigin
     @GetMapping(
         value = "/listInstances",
         produces = { "application/json" }

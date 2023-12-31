@@ -8,6 +8,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,16 +69,17 @@ public class LeaseController{
 
 
     /**
-     * PUT /lease/update : will create a lease, with the request body provided
+     * PUT /lease : will create a lease, with the request body provided
      *
      * @param leaseRequest  (required)
      * @return request is valid, and server accepted it. (status code 202)
      */
     @PutMapping(
-        value = "/update",
+        value = "",
         produces = { "application/json" },
         consumes = { "application/json" }
     )
+    @CrossOrigin
     public ResponseEntity<LeaseView> updateLease(
         @Valid @RequestBody LeaseView leaseRequest) {
         
