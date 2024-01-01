@@ -1,0 +1,36 @@
+# MongoDB Configuration
+spring:
+  profiles:
+    active: default
+  application:
+    name: composite-service
+  # security:
+  #   user:
+  #     name: admin
+  #     password: admin
+# Server Configuration
+server:
+  port: 8080
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    # org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: DEBUG
+    # org.springframework.cloud.gateway: DEBUG
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8080/eureka}
+  instance:
+    preferIpAddress: true
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 60000
+
+---
+spring:
+  config.activate.on-profile: docker

@@ -1,0 +1,330 @@
+openapi: "3.1.0"
+info:
+    version: "1.0.0"
+    title: "Cloud instance manager API"
+    description: Manage instance and lease of the instances
+    contact:
+        name: Harsh Paliwal
+        url: https://github.io/projects/cloud-instance-manager
+        email: paliwal.999harsh+cim@gmail.com
+    license:
+        name: Apache 2.0
+        url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+    - url: localhost:{port}/cim/api/{basePath}
+      description: the development server
+      variables:
+        port:
+            enum:
+                - '8080'
+                - '8081'
+            default: '8080'
+        basePath: 
+            default: v1
+paths:
+    /instances/{instanceName}:
+        parameters:
+            - name: instanceName
+              description: The unique name of the instance, max length 15
+              in: path
+              required: true
+              schema:
+                  $ref: "#/components/schemas/InstanceName"
+        get:
+            operationId: Read a instance
+            description: Read a instance
+            responses:
+                200:
+                    description: The instance corresponding to the provided `instanceName`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InstanceView"
+                404:
+                    description: No instance found for the provided `instanceName`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InstanceNotFoundException"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GlobalControllerException"
+        delete:
+            operationId: Delete a instance
+            description: deletes the instance
+            responses:
+                405:
+                    description: Method not allowed
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+        put:
+            operationId: Modify State of a instance
+            description: set the state of instance
+            parameters:
+                - name: setState
+                  description: the state of the instance, to start or stop the instance
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                200:
+                    description: the instance state has been set to given 'state'
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                400:
+                    description: the provided state is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidInstanceStateException"
+                404:
+                    description: No instance found for the provided `instanceName`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InstanceNotFoundException"
+    /instances/listInstances:
+        parameters:
+            - name: cloud
+              description: specify the cloud type, i.e either AWS or Azure
+              in: query
+              required: false
+              schema:
+                  $ref: "#/components/schemas/CloudProvider"
+        get:
+            operationId: Read all instances
+            description: Read all the instances
+            responses:
+                200:
+                    description: list all instances available in the cloud  
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/InstanceView"
+                204:
+                    description: no instances are available in the cloud
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                400:
+                    description: invalid cloud type provided
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidCloudProviderException"
+    /instances:
+        post:
+            operationId: Create a instance
+            description: will create a instance, with the request body provided
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                instanceName:
+                                    type: string
+                                    maxLength: 15
+                                cloud:
+                                    $ref: "#/components/schemas/CloudProvider"
+            responses:
+                201:
+                    description: request is valid, and server accepted it.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InstanceView"
+                418:
+                    description: invalid cloud type provided
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidCloudProviderException"
+    /lease:
+        put:
+            operationId: Update Lease for a instance
+            description: will create a lease, with the request body provided
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                instanceName:
+                                    $ref: "#/components/schemas/InstanceName"
+                                startDateTime:
+                                    type: string
+                                endDateTime:
+                                    type: string
+                                alwaysOn:
+                                    type: boolean
+                                weekendOn:
+                                    type: boolean                          
+            responses:
+                202:
+                    description: request is valid, and server processed it.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LeaseView"
+        get:
+            operationId: Read a lease
+            description: Read a lease
+            parameters:
+                - name: instanceName
+                  description: the unique name of the instance
+                  in: query
+                  required: true
+                  schema:
+                      $ref: "#/components/schemas/InstanceName"
+            responses:
+                200:
+                    description: Read a lease corresponding to the given 'instanceName'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LeaseView"
+components:
+    schemas:
+        InstanceId:
+            description: The unique identifier of a instance
+            type: string
+        InstanceName:
+            description: The unique name of a instance  
+            type: string
+            maxLength: 15
+        CloudProvider:
+            description: The unique cloud type of a instance
+            type: string
+            enum: 
+                - AWS
+                - Azure
+            default: AWS
+        InstanceEntity:
+            type: object
+            required:
+                - instanceId
+                - instanceName
+                - cloud
+                - version
+            properties:
+                instanceId:
+                    $ref: "#/components/schemas/InstanceId"
+                instanceName:
+                    $ref: "#/components/schemas/InstanceName"
+                cloud:
+                    $ref: "#/components/schemas/CloudProvider"
+                version:
+                    type: int
+        InstanceView:
+            type: object
+            required:
+                - instanceId
+                - instanceName
+                - cloud
+            properties:
+                instanceId:
+                    $ref: "#/components/schemas/InstanceId"
+                instanceName:
+                    $ref: "#/components/schemas/InstanceName"
+                cloud:
+                    $ref: "#/components/schemas/CloudProvider"
+        InstanceRequestDTO:
+            type: object
+            required:
+                - instanceName
+                - cloud
+            properties:
+                instanceName:
+                    $ref: "#/components/schemas/InstanceName"
+                cloud:
+                    $ref: "#/components/schemas/CloudProvider"
+        LeaseEntity:
+            type: object
+            required:
+                - instance
+                - startDateTime
+                - endDateTime
+                - alwaysOn
+                - weekendOn
+            properties:
+                instance:
+                    $ref: "#/components/schemas/InstanceEntity"
+                startDateTime:
+                    type: string
+                endDateTime:
+                    type: string
+                alwaysOn:
+                    type: boolean
+                weekendOn:
+                    type: boolean
+        LeaseView:
+            type: object
+            required:
+                - instanceName
+                - startDateTime
+                - endDateTime
+                - alwaysOn
+                - weekendOn
+            properties:
+                instanceName:
+                    $ref: "#/components/schemas/InstanceName"
+                startDateTime:
+                    type: string
+                endDateTime:
+                    type: string
+                alwaysOn:
+                    type: boolean
+                weekendOn:
+                    type: boolean
+        GlobalControllerException:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    description: Global Controller Exception Handler
+                    type: string
+        InstanceNotFoundException:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    description: Requested instance not found in the enterprise.
+                    type: string
+        InvalidInstanceStateException:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    description: prompted state is invalid state
+                    type: string
+        InvalidCloudProviderException:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    description: prompted cloud type is invalid
+                    type: string
+#     securitySchemes:
+#         basicAuth:
+#             type: http
+#             scheme: basic
+# security:
+#   - basicAuth: []

@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "fixedRate.in.milliseconds",
+    "type": "java.lang.String",
+    "description": "It will used for scheduling the find tiggers method"
+  }
+]}

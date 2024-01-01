@@ -1,0 +1,7 @@
+include ':services:composite-service',
+        ':services:instance-service',
+        ':services:lease-service',
+        ':services:trigger-service',
+        ':services:edge-service',
+        ':dto',
+        ':util'
