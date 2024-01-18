@@ -32,7 +32,7 @@ public class InstanceModelListener extends AbstractMongoEventListener<InstanceEn
 
     @Override
     public void onAfterSave(AfterSaveEvent<InstanceEntity> event){
-        String leaseServiceUrl = "http://lease-service:8080/lease";
+        String leaseServiceUrl = "http://lease-service:8080/cim/api/v1/lease";
         restTemplate.postForEntity(leaseServiceUrl, event.getSource(), LeaseDTO.class);
     }
 }

@@ -40,6 +40,6 @@ out/
 mongodb/
 
 ### docker compose file ###
-compose.yaml
 
 .gradle/*
+gradle/*

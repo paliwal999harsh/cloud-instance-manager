@@ -1,0 +1,95 @@
+version: '3'
+services:
+  mongo:
+    image: mongo
+    mem_limit: 512m
+    volumes:
+      - ./mongodb/data/configdb:/data/configdb:rw
+      - ./mongodb/data/db:/data/db:rw
+    ports:
+      - "27017:27017"
+    command: "mongod"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 30s
+      retries: 15
+      start_period: 30s
+  composite-service:
+    build:
+      context: ./services/composite-service
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8084:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  edge-service:
+    build:
+      context: ./services/edge-service
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  instance-service:
+    build:
+      context: ./services/instance-service
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AWS_ACCESS_KEY_ID=access_key
+      - AWS_SECRET_ACCESS_KEY=access_secret
+    ports:
+      - "8081:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  lease-service:
+    build:
+      context: ./services/lease-service
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8082:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  trigger-service:
+    build:
+      context: ./services/trigger-service
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8083:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  frontend-service:
+    build:
+      context: ./services/frontend-service
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    ports:
+      - "3000:80"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped

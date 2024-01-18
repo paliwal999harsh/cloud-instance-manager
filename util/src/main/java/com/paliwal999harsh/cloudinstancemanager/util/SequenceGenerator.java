@@ -18,12 +18,8 @@ import lombok.Data;
 @Component
 public class SequenceGenerator {
     
-    private MongoOperations mongoOperations;
-
     @Autowired
-    public SequenceGenerator(MongoOperations mongoOperations) {
-        this.mongoOperations = mongoOperations;
-    }
+    private MongoOperations mongoOperations;
 
     public long generateSequence(String seqName) {
 

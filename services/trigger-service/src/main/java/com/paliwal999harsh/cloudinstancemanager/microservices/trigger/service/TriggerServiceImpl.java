@@ -100,16 +100,15 @@ public class TriggerServiceImpl implements TriggerService {
         List<TriggerEntity> triggers = triggerRepo.findByFireTimeBetween(startDateTime,endDateTime);
         log.info("Found {} triggers", triggers.size());
         
-        String instanceServiceUrl = "http://instance-service:8080/";
+        String instanceServiceUrl = "http://instance-service:8080/cim/api/v1/instance/";
         triggers.forEach( trigger -> {
             switch(trigger.getAction()){
                 case START_ACTION:
-                    restTemplate.put(instanceServiceUrl+trigger.getInstanceName(),null);
-                    // awsService.startInstance(trigger.getInstanceName());
+                    restTemplate.put(instanceServiceUrl+trigger.getInstanceName()+"?setState=START",null);
                     log.info("Starting instance: {}...",trigger.getInstanceName());
                     break;
                 case STOP_ACTION:
-                    // awsService.stopInstance(trigger.getInstanceName());
+                    restTemplate.put(instanceServiceUrl+trigger.getInstanceName()+"?setState=STOP",null);
                     log.info("Stopping instance: {}...",trigger.getInstanceName());
                     break;
                 default:

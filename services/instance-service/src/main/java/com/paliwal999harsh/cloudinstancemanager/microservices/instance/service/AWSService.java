@@ -17,12 +17,17 @@ import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsPro
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 @Service
@@ -57,27 +62,27 @@ public class AWSService implements InstanceService{
      */
     @Override
     public InstanceEntity createInstance(String instanceName) {
-        // String amiId = "ami-02a2af70a66af6dfb";
-        // RunInstancesRequest runRequest = RunInstancesRequest.builder()
-        //         .imageId(amiId)
-        //         .instanceType(InstanceType.T2_MICRO)
-        //         .maxCount(1)
-        //         .minCount(1)
-        //         .build();
+        String amiId = "ami-02a2af70a66af6dfb";
+        RunInstancesRequest runRequest = RunInstancesRequest.builder()
+                .imageId(amiId)
+                .instanceType(InstanceType.T2_MICRO)
+                .maxCount(1)
+                .minCount(1)
+                .build();
         try {
-			// RunInstancesResponse response = ec2.runInstances(runRequest);
-			// String instanceId = response.instances().get(0).instanceId();
-            // Tag tag = Tag.builder()
-            //         .key("Name")
-            //         .value(instanceName)
-            //         .build();
-            // CreateTagsRequest tagRequest = CreateTagsRequest.builder()
-            // .resources(instanceId)
-            // .tags(tag)
-            // .build();
-            // ec2.createTags(tagRequest);
-			// log.info("Successfully started EC2 Instance {} based on AMI {}",
-			//         instanceId, amiId);
+			RunInstancesResponse response = ec2.runInstances(runRequest);
+			String instanceId = response.instances().get(0).instanceId();
+            Tag tag = Tag.builder()
+                    .key("Name")
+                    .value(instanceName)
+                    .build();
+            CreateTagsRequest tagRequest = CreateTagsRequest.builder()
+            .resources(instanceId)
+            .tags(tag)
+            .build();
+            ec2.createTags(tagRequest);
+			log.info("Successfully started EC2 Instance {} based on AMI {}",
+			        instanceId, amiId);
 			InstanceEntity instance = new InstanceEntity(instanceName,instanceName,CloudProvider.AWS);
 			return instanceRepo.save(instance);
 		}

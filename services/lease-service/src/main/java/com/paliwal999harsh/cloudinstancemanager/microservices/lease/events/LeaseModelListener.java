@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.paliwal999harsh.cloudinstancemanager.microservices.lease.config.LeaseMapper;
 import com.paliwal999harsh.cloudinstancemanager.microservices.lease.model.LeaseEntity;
 import com.paliwal999harsh.cloudinstancemanager.util.SequenceGenerator;
 
@@ -16,6 +17,9 @@ public class LeaseModelListener extends AbstractMongoEventListener<LeaseEntity> 
     
     @Autowired
     private SequenceGenerator sequenceGenerator;
+
+    @Autowired
+    private LeaseMapper mapper;
     
     private RestTemplate restTemplate;
     
@@ -32,7 +36,7 @@ public class LeaseModelListener extends AbstractMongoEventListener<LeaseEntity> 
 
     @Override
     public void onAfterSave(AfterSaveEvent<LeaseEntity> event){
-        String triggerServiceUrl = "http://trigger-service:8080/trigger/generateActions";
-        restTemplate.postForEntity(triggerServiceUrl, event.getSource(), Void.class);
+        String triggerServiceUrl = "http://trigger-service:8080/cim/api/v1/trigger/generateActions";
+        restTemplate.postForEntity(triggerServiceUrl, mapper.entityToDto(event.getSource()), Void.class);
     }
 }
