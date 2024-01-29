@@ -7,3 +7,12 @@
 [submodule "services/cim_lease_service"]
 	path = services/cim_lease_service
 	url = https://github.com/paliwal999harsh/cim_lease_service.git
+[submodule "services/trigger-service"]
+	path = services/trigger-service
+	url = https://github.com/paliwal999harsh/cim_trigger_service.git
+[submodule "services/edge-service"]
+	path = services/edge-service
+	url = https://github.com/paliwal999harsh/cim_edge_service.git
+[submodule "services/composite-service"]
+	path = services/composite-service
+	url = https://github.com/paliwal999harsh/cim_composite_service.git
