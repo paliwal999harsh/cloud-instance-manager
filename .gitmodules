@@ -16,3 +16,6 @@
 [submodule "services/composite-service"]
 	path = services/composite-service
 	url = https://github.com/paliwal999harsh/cim_composite_service.git
+[submodule "services/lease-service"]
+	path = services/lease-service
+	url = https://github.com/paliwal999harsh/cim_lease_service.git
