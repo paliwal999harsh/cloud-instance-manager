@@ -1,7 +1,6 @@
 import React from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
-import Instance from './components/Instance';
 import Lease from './components/Lease';
 import Navigation from './components/Navigation';
 
@@ -11,7 +10,7 @@ function App() {
     <div>
       <Navigation />
       <Routes>
-        <Route path="/instance" element={<Instance />} />
+        {/* <Route path="/instance" element={<Instance />} /> */}
         <Route path="/lease" element={<Lease />} />
       </Routes>
     </div>
