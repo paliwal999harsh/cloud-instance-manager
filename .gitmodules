@@ -4,3 +4,6 @@
 [submodule "services/frontend-service"]
 	path = services/frontend-service
 	url = https://github.com/paliwal999harsh/cim_frontend_service.git
+[submodule "services/cim_lease_service"]
+	path = services/cim_lease_service
+	url = https://github.com/paliwal999harsh/cim_lease_service.git
