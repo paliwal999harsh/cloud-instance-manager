@@ -1,3 +1,6 @@
 [submodule "services/instance-service"]
 	path = services/instance-service
 	url = https://github.com/paliwal999harsh/cim_instance_service.git
+[submodule "services/frontend-service"]
+	path = services/frontend-service
+	url = https://github.com/paliwal999harsh/cim_frontend_service.git
