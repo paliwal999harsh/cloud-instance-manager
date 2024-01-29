@@ -1,0 +1,3 @@
+[submodule "services/instance-service"]
+	path = services/instance-service
+	url = https://github.com/paliwal999harsh/cim_instance_service.git
